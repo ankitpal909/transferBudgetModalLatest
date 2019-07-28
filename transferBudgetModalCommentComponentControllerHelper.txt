@@ -1,0 +1,19 @@
+({
+    cancel : function(component, event, helper) {
+        //component.set("v.showTransferBudgetCommentModal", false);
+        var cmpEvent = component.getEvent("interactionCompEvent");
+        cmpEvent.setParams({
+            "action" : "showTransferBudgetCommentModal"
+        });
+        cmpEvent.fire();
+    },
+    save : function(component, event, helper) {
+        var cmpEvent = component.getEvent("interactionCompEvent");
+        cmpEvent.setParams({
+            "action" : "showTransferBudgetCommentModal"
+        });
+        cmpEvent.fire();
+        //component.set("v.showSpinner", false);
+        //component.set("v.showTransferBudgetCommentModal", false);
+    },
+})

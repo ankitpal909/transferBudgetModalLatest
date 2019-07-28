@@ -1,0 +1,38 @@
+<aura:component implements="lightning:actionOverride,force:appHostable,flexipage:availableForAllPageTypes" access="global" >
+    <aura:attribute name="showTransferBudgetCommentModal" type="Boolean" default="true"/>
+    <aura:attribute name="showSpinner" type="Boolean" default="false"/>
+    <aura:attribute name="comment" type="String" />
+    
+    <!--register event ..-->    
+    <aura:registerEvent name="interactionCompEvent" type="c:interactionCompEvent" />
+    <!--register event ..-->
+    <aura:if isTrue="{!v.showTransferBudgetCommentModal}">
+        <section class="slds-modal slds-fade-in-open" >
+            <div class="slds-modal__container ahm-sizeOfModal">
+                <span class="ahm-commentBox" >
+                    <header class="slds-modal__header slds-p-around_xxx-small">
+                        <div class="slds-text-heading_medium">
+                            Comments
+                            <lightning:icon iconName="utility:clear" class="slds-float_right" size="small" onclick="{!c.cancel}" />
+                        </div>
+                    </header>
+                    <!--<header class="slds-modal__header" />-->
+                    <div class="slds-modal__content" >
+                        <!--<lightning:inputRichText value="{!v.comment}" placeholder="comment .."/>-->
+                        <textarea id="textarea-id-01" class="slds-textarea" placeholder="Placeholder Text"></textarea>
+                    </div>
+                    <footer class="slds-modal__footer slds-p-around_xx-small">
+                        <span class="{!v.showSpinner ? 'slds-hide' : 'slds-show'}">
+                            <button class="slds-button slds-button_neutral" onclick="{!c.cancel}">Cancel</button>
+                            <button class="slds-button slds-button_brand" onclick="{!c.save}">Save</button>
+                        </span>
+                        <div class="{!v.showSpinner ? 'slds-is-relative slds-p-around_medium slds-float_right':'slds-hide'}">
+                            <lightning:spinner class="ahm-Spinner-Background" variant="brand" size="small"/>
+                        </div>
+                    </footer>
+                </span>
+            </div>
+        </section>
+        <!--<div class="slds-backdrop slds-backdrop_open"></div>-->
+    </aura:if>
+</aura:component>

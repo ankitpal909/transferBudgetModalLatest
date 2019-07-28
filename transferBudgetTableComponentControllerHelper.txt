@@ -1,0 +1,35 @@
+({
+    /*handleClick : function(component, event, helper) {
+        var cmpEvent = component.getEvent("interactionCompEvent");
+        cmpEvent.setParams({
+            "action" : "showTransferBudgetCommentModal"
+        });
+        cmpEvent.fire();
+    },*/
+    
+    doInitHelper : function (component, event, helper){
+        var budgetAllocationHistoryOrganizationUnitLowLevel = component.get('v.budgetAllocationHistoryOrganizationUnitLowLevel');       
+        /* var budgetWrapperArray = [{
+            count: count,
+            amount: amount
+        }]; */
+        if(!$A.util.isEmpty(budgetAllocationHistoryOrganizationUnitLowLevel)){
+            _.forEach(budgetAllocationHistoryOrganizationUnitLowLevel, function(lowLevel){
+                lowLevel.count = '';
+                lowLevel.amount='';
+            });
+            component.set('v.budgetAllocationHistoryOrganizationUnitLowLevel',budgetAllocationHistoryOrganizationUnitLowLevel);
+        }        
+    },
+    
+    handleClick : function(component, event, helper){
+        component.set("v.showTransferBudgetCommentModal", true);
+    },
+    
+    handleInteractionCompEvent : function(component, event, helper){
+        var action = event.getParam( 'action' );
+        if(action=='showTransferBudgetCommentModal'){
+            component.set("v.showTransferBudgetCommentModal", false);
+        }
+    },
+})

@@ -1,0 +1,134 @@
+<aura:component >
+    
+    <!--Attributes Start-->
+    
+    <aura:attribute name="columnHeaders" type="List" description="For Showing Table's Column Headers"/>
+    <aura:attribute name="allocatedAmount" type="Decimal"/>
+    <aura:attribute name="allocatedCount" type="Decimal"/>
+    <aura:attribute name="budgetAllocationHistoryOrganizationUnitLowLevel" type="List" description="To display Table Data"/>
+    <aura:attribute name="amountIn" type="String" description="For amount type USD/RUP"/>
+    <aura:attribute name="showTransferBudgetCommentModal" type="Boolean" default="false"/>
+    
+    <!--Attributes End-->
+    
+    <!--Designer Attribute Start-->
+    
+    <aura:attribute name="deleteBudgetActionVisibility" type="String" default="Show" access="global"
+                    description="Determines whether users are allowed to delete a budget(s)" />
+    
+    <!--Designer Attribute Ends-->
+    
+    <!--<aura:registerEvent name="interactionCompEvent" type="c:interactionCompEvent" />-->
+    
+    <!--handler-->  
+    <aura:handler name="interactionCompEvent" event="c:interactionCompEvent" action="{!c.handleInteractionCompEvent}" />
+    <!--handler-->
+    
+    <!--Table starts-->
+    
+    <lightning:layout class=" slds-grid slds-p-around_-medium slds-p-left_x-small slds-p-top_small slds-p-right_x-small">
+        <table aura:id="transferBudgetTable" class="slds-table slds-table_bordered slds-table_fixed-layout slds-no-row-hover slds-table_bordered slds-max-medium-table_stacked-vertical">        
+            
+            <thead>
+                <tr class="slds-text-title_caps">
+                    <aura:iteration items="{!v.columnHeaders}" var="col"> 
+                        <th class="ahm-tableHeaderColor" scope="col" id="{!col}" title="{!col}"> 
+                            <div class="slds-truncate">{!col}</div>
+                        </th> 
+                    </aura:iteration>
+                </tr>
+            </thead>
+            
+            <tbody>
+                
+                <aura:iteration items="{!v.budgetAllocationHistoryOrganizationUnitLowLevel}" var="lowLevelDetails" indexVar="index" >
+                    <tr scope="row">
+                        
+                        <td>
+                            <div class="slds-truncate">
+                                <div class="ahm-tooltip slds-text-title_bold slds-truncate">
+                                    {!lowLevelDetails.organizationUnit.Name}
+                                    <span class="ahm-popoverName ahm-tooltiptext slds-text-title_bold slds-nubbin_bottom slds-slide-from-bottom-to-top slds-popover slds-popover__body">
+                                        {!lowLevelDetails.organizationUnit.Name}
+                                    </span>
+                                </div>
+                                <div class="ahm-tooltip slds-text-body_regular slds-col slds-truncate">
+                                    {!lowLevelDetails.organizationUnit.Organization_Unit_Number__c}
+                                    <span class="ahm-tooltiptext ahm-popover slds-nubbin_bottom slds-slide-from-bottom-to-top slds-popover slds-popover__body">                                        
+                                        {!lowLevelDetails.organizationUnit.Organization_Unit_Number__c}
+                                    </span>
+                                </div>
+                                <div class="ahm-tooltip slds-text-color_weak slds-truncate">
+                                    Available Balance:  {!v.amountIn} <span class="slds-p-left_xx-small">{!(equals(v.amountIn,'USD') ? lowLevelDetails.Amount: (lowLevelDetails.Amount*70))}</span>
+                                    <span class="ahm-tooltiptext ahm-popover slds-nubbin_bottom slds-slide-from-bottom-to-top slds-popover slds-popover__body">
+                                        Available Balance: {!v.amountIn} <span class="slds-p-left_xx-small"> {!(equals(v.amountIn,'USD') ? lowLevelDetails.Amount: (lowLevelDetails.Amount*70))}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <div class="ahm-tooltip slds-size_7-of-8">
+                                <div class="ahm-boxContent slds-box slds-grid slds-theme_shade">
+                                    <div class="ahm-TableOuterBox slds-size_2-of-12 slds-small-size_1-of-3 slds-medium-size_3-of-6 slds-large-size_3-of-12">
+                                        {!v.amountIn}
+                                    </div>
+                                    <div class="slds-size_10-of-12 slds-truncate slds-small-size_2-of-3 slds-medium-size_3-of-6 slds-large-size_9-of-12">
+                                        <lightning:input value="{!lowLevelDetails.amount}"
+                                                         maximumFractionDigits="2"
+                                                         type="Number"
+                                                         />        
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td >
+                            <div class="ahm-tooltip slds-size_5-of-8">
+                                <div class="ahm-boxContent slds-box slds-grid slds-theme_shade">
+                                    <div class="ahm-TableOuterBox1 slds-size_10-of-12 slds-truncate  slds-small-size_2-of-3 slds-medium-size_3-of-6 slds-large-size_9-of-12">
+                                        <lightning:input value="{!lowLevelDetails.count}"
+                                                         type="Number"
+                                                         onkeyup="{!c.getCount}"
+                                                         />        
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <lightning:input type="checkbox"/>
+                        </td>
+                        <td>
+                            <div class="slds-float_right slds-grid">
+                                <span>
+                                    <aura:if isTrue="{!v.showTransferBudgetCommentModal}">
+                                        <!--comment component ..-->
+                                        <c:transferBudgetModalCommentComponent showTransferBudgetCommentModal="{!v.showTransferBudgetCommentModal}" />
+                                        <!--comment component ..-->
+                                    </aura:if>
+                                </span>
+                                <span class=" ahm-icon slds-p-around_x-small slds-box slds-box_xx-small">
+                                    <lightning:icon iconName="utility:comments" size="small" onclick="{!c.handleClick}"/>
+                                    <span class="ahm-notification">10</span>
+                                </span>
+                                <span>
+                                    <lightning:buttonMenu class="slds-p-left_xx-small" iconSize="medium" menuAlignment="right">
+                                        <aura:if isTrue="{!equals(v.deleteBudgetActionVisibility,'Show')}">
+                                            <lightning:menuItem value="DELETE" label="Delete" />
+                                            <aura:set attribute="else">
+                                                <lightning:menuItem label="No Actions Available" 
+                                                                    disabled="true" />
+                                            </aura:set>
+                                        </aura:if>
+                                    </lightning:buttonMenu>
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                </aura:iteration>
+            </tbody>
+        </table>  
+    </lightning:layout>
+    
+    <!--Table Ends-->
+    
+</aura:component>

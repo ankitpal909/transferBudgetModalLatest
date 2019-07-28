@@ -1,0 +1,70 @@
+.THIS  .ahm-tooltip > .ahm-tooltiptext {
+    display:none;
+}
+
+.THIS .ahm-tooltip:hover .ahm-tooltiptext{
+    display: block;
+    position: absolute;
+    z-index: 1;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    background-color:#002966;
+    text-align: left;
+    padding:1rem;
+    color: white;    
+}
+
+.THIS .ahm-popoverName{
+    transform: translateY(-5em);
+}
+
+.THIS .ahm-popover{
+    transform: translateY(-6em);
+}
+
+.THIS .ahm-TableOuterBox{
+    padding-right: 1rem;
+}
+
+.THIS .ahm-TableOuterBox1{
+    padding-bottom: 1rem;
+}
+
+.THIS .ahm-boxContent{
+    padding-bottom: 0rem;
+    padding-top: 0rem;
+}
+
+.THIS .ahm-boxContent1{
+    padding-bottom: 0rem;
+    padding-top: 0rem;
+    
+    padding-left: 0rem;
+}
+
+.THIS .ahm-icon {
+    display: inline-block;
+    position: relative;
+}
+
+.THIS .ahm-notification{
+    background-color:Orange;
+    border-radius: 1rem;
+    color: black;
+    
+    padding: 0.1rem;
+    font-size:0.7rem;
+    
+    position: absolute; 
+    top:-0.5rem;
+    right: 0rem;
+}
+
+.THIS .ahm-tableHeaderColor{
+    background-color:#fafaf9 !important;
+}
+
+.THIS .ahm-tableHeaderColor:hover{
+    background-color:white !important;
+}

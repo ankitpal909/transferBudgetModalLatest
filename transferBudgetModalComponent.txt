@@ -1,0 +1,335 @@
+<aura:component extends="c:RecordBaseComponent" implements="lightning:actionOverride,force:appHostable" access="global" >
+    
+    <aura:attribute name="budgetAllocationHistoryHelpTextType" type="String" default="Helptext : Budget Allocation History" />
+    <aura:attribute name="budgetAllocationHistoryHelpTextVisibility" type="String" default="Show" />
+    <aura:attribute name="budgetAllocationHistoryHelpTextBorder" type="String" default="Hide" />
+    <aura:attribute name="budgetAllocationHistoryHelpTextWeight" type="String" default="Show" />
+    <aura:attribute name="infoMsg" type="String" default="Select the organization unit that you want to allocate the budget from.
+                                                          Selecting it would populate the organization units to which you can allocate
+                                                          the budget to."/>
+    <aura:attribute name="columnHeaders" type="List" default="['Organization Unit','Amount','Count','Available For Lower Level','']"/>
+    
+    <aura:attribute name="budgetAllocationHistoryOrganizationUnit" type="String" default="Centris Pharma"/>
+    <aura:attribute name="budgetAllocationHistoryOrganizationUnitPhone" type="String" default="(423432) - Mo Kabil"/>
+    <aura:attribute name="budgetAllocationHistoryOrganizationUnitLowLevel"
+                    type="Object[]"
+                   />
+    <aura:attribute name="budgetTransferObj" type="Object"/>
+    <aura:attribute name="willHandleCompActions" type="String[]" default="['ADD_ORG_UNITS','HIDE_CONFIRMATION_MODAL']" />
+    <aura:attribute name="showBudgetTransferModal" type="Boolean" default="true"/>
+    <aura:attribute name="showSpinner" type="Boolean" default="false"/>
+    <aura:attribute name="amount" type="Decimal" default="4000.00" />
+    <aura:attribute name="count" type="Decimal" default="10.00" />
+    <aura:attribute name="amountIn" type="String" default="USD"/>
+    <aura:attribute name="allocatedAmount" type="Decimal" default="0.00"/>
+    <aura:attribute name="allocatedAmountList" type="List"/>
+    <aura:attribute name="allocatedCount" type="Decimal" default="0.00"/>
+    <aura:attribute name="showSearchAddOrgUnitModal" type="Boolean" default="false" />
+    <aura:attribute name="budgetId" type="String" />
+    <aura:attribute name="orgUnitFieldsForLabels" type="String[]" 
+                    default="['Name','Organization_Unit_Number__c','Organization_Unit_Sub_Type__c',
+                             'Parent_Organization_Unit__c','Company__c','Region__c','Organization_Unit_Type__c']" />
+    <aura:attribute name="orgUnitLabels" type="Object"/>
+    <aura:attribute name="context" type="String"/>
+    <aura:attribute name="alignOrgUnitToBudget" type="Object" />
+    
+    
+    <!--Designer Attribute starts-->
+    <aura:attribute name="searchOrganizationUnitHelpTextType" type="String" access="global" 
+                    default="Helptext : Search Organziation Unit"  /> 
+    <aura:attribute name="searchOrganizationUnitHelpTextVisibility" type="String" access="global" default="Show"  />
+    <!--Designer Attribute End-->
+    
+    <aura:registerEvent name="interactionCompEvent" type="c:interactionCompEvent" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="interactionCompEvent" event="c:interactionCompEvent" action="{!c.handleInteractionCompEvent}" /> 
+    
+    <!-- SERVICES / BACKGROUD COMPONENTS -->
+    <c:ObjectMetaDataService aura:id="objectMetadataService"/> 
+    <c:BudgetService aura:id="budgetService" />
+    <c:ApplicationSettingsService aura:id="applicationSettingsService" />
+    <!-- SERVICES / BACKGROUD COMPONENTS END-->
+    
+    <aura:if isTrue="{!v.showBudgetTransferModal}">
+        <c:modal aura:id="selectOrgUnit" title="Transfer Budget" showLargeModal="true">
+            <div class="slds-p-horizontal_medium">
+                <c:InstructionalText instructionalTextTypeValue="{!v.budgetAllocationHistoryHelpTextType}"
+                                     instructionalTextBorderVisibility="{!v.budgetAllocationHistoryHelpTextBorder}"
+                                     instructionalTextFontWeight="slds-text-color_weak"
+                                     isAppPage="false" infoMsg="{!v.infoMsg}" isChild="true"
+                                     />
+            </div>
+            <div class="slds-p-horizontal_medium">
+                <div>
+                    <span class="slds-text-title_bold slds-p-top_small" >
+                        Allocate From
+                    </span>
+                    <span class="slds-p-top_xx-small slds-float_right">
+                        <lightning:buttonMenu class="slds-p-left_xx-small" label="{!'Budget Currency'+ '('+v.amountIn+')'}" iconSize="medium" menuAlignment="right" onselect="{!c.handleSelectMenuButton}">
+                            <lightning:menuItem value="DOLLER" label="Doller" disabled="{!equals(v.amountIn,'USD') ? true : false}"/>
+                            <lightning:menuItem value="RUPEE" label="Rupee" disabled="{!equals(v.amountIn,'RUP') ? true : false}"/>
+                        </lightning:buttonMenu>
+                    </span>
+                </div>
+                <!--<lightning:layout class="slds-grid slds-p-top_small" multipleRows="true">
+                    <span class="slds-size_3-of-8
+                                 slds-small-size_2-of-3
+                                 slds-medium-size_2-of-3
+                                 slds-large-size_3-of-8
+                                 slds-box slds-p-horizontal_medium
+                                 slds-box_xx-small
+                                 ahm-button">
+                        <div class="{!!and(empty(v.budgetAllocationHistoryOrganizationUnit), (v.budgetAllocationHistoryOrganizationUnitPhone)) ?
+                                    'ahm-transferBudgetModalInnerBox
+                                    slds-box
+                                    slds-truncate
+                                    tooltip' : 
+                                    'ahm-transferBudgetModalInnerBox
+                                    slds-box
+                                    slds-truncate'}">
+                            <div class="slds-grid">
+                                <div class="slds-text-title_bold ahm-regularTextForInnerBox slds-truncate" >
+                                    {!v.budgetAllocationHistoryOrganizationUnit}
+                                    
+                                </div>
+                                <div class="slds-text-body_regular slds-col slds-truncate tooltip slds-p-left_xxx-small">
+                                    {!v.budgetAllocationHistoryOrganizationUnitPhone}
+                                </div>
+                                <lightning:icon class="{!and(!empty(v.budgetAllocationHistoryOrganizationUnit, v.budgetAllocationHistoryOrganizationUnitPhone))
+                                                       ? 'slds-show' : 'slds-hide'}"
+                                                iconName="utility:clear" size="xx-small" onclick="{!c.clearDetails}" />
+                            </div>
+                            
+                            
+                            <span class="{!and(!empty(v.budgetAllocationHistoryOrganizationUnit, v.budgetAllocationHistoryOrganizationUnitPhone)) ?
+                                         'tooltiptext ahm-popup slds-nubbin_bottom slds-slide-from-bottom-to-top slds-popover slds-popover__body' :
+                                         'slds-hide'}"> 
+                                {!v.budgetAllocationHistoryOrganizationUnit}
+                                {!v.budgetAllocationHistoryOrganizationUnitPhone}
+                            </span>
+                            
+                            
+                        </div>
+                    </span>
+                    <span class="slds-p-top_xx-small">
+                        <lightning:button aura:id="messageModal"
+                                          class="slds-truncate"
+                                          label="Change Organization Unit"
+                                          onclick="{!c.showBudgetAccessModal}"/>
+                    </span>
+                    
+                </lightning:layout>-->
+                
+                
+                <lightning:layout multipleRows="true">
+                    <span class="slds-size_3-of-8
+                                 slds-small-size_2-of-3
+                                 slds-medium-size_2-of-3
+                                 slds-large-size_3-of-8
+                                 ahm-button slds-border_bottom">
+                        <div class="{!!and(empty(v.budgetAllocationHistoryOrganizationUnit), (v.budgetAllocationHistoryOrganizationUnitPhone)) ?
+                                    'ahm-transferBudgetModalInnerBox
+                                    slds-truncate
+                                    tooltip' : 
+                                    'ahm-transferBudgetModalInnerBox
+                                    slds-truncate'}">
+                            <div class="slds-grid">
+                                <div class="slds-text-title_bold ahm-regularTextForInnerBox slds-truncate" >
+                                    {!v.budgetAllocationHistoryOrganizationUnit}
+                                    
+                                </div>
+                                <div class="slds-text-body_regular slds-col slds-truncate tooltip slds-p-left_xxx-small">
+                                    {!v.budgetAllocationHistoryOrganizationUnitPhone}
+                                </div>
+                            </div>
+                            
+                            
+                            <span class="{!and(!empty(v.budgetAllocationHistoryOrganizationUnit, v.budgetAllocationHistoryOrganizationUnitPhone)) ?
+                                         'tooltiptext ahm-popup slds-nubbin_bottom slds-slide-from-bottom-to-top slds-popover slds-popover__body' :
+                                         'slds-hide'}"> 
+                                {!v.budgetAllocationHistoryOrganizationUnit}
+                                {!v.budgetAllocationHistoryOrganizationUnitPhone}
+                            </span>
+                        </div>
+                    </span>
+                    <span class="slds-p-top_xx-small">
+                        <lightning:button aura:id="messageModal"
+                                          class="slds-truncate"
+                                          label="Change Organization Unit"
+                                          onclick="{!c.changeOrganizationUnit}"/>
+                    </span>
+                    
+                </lightning:layout>
+                
+                <div class="slds-grid
+                            slds-p-top_xx-small">
+                    <div class="slds-size_3-of-8
+                                ahm-textoutputBackground
+                                slds-p-horizontal_small
+                                slds-truncate tooltip
+                                slds-text-color_weak
+                                slds-small-size_2-of-3
+                                slds-medium-size_2-of-3
+                                slds-large-size_3-of-8">
+                        <span class="slds-text-color_weak">
+                            (Available Balance
+                        </span>
+                        <span class="slds-text-color_default">
+                            : {!v.amountIn} <span class="slds-p-left_xxx-small">{!v.amount},Available Count : {!v.count}</span>)
+                        </span>
+                        <span class="tooltiptext ahm-popup slds-nubbin_bottom slds-slide-from-bottom-to-top slds-popover slds-popover__body">
+                            (Available Balance : {!v.amountIn} 
+                            <span class="slds-p-left_xx-small slds-p-right_xx-small">
+                                {!v.amount}, Available Count : {!v.count})</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-text-title_bold slds-p-top_xx-large slds-p-horizontal_medium" >
+                Allocate To
+            </div>
+            <!--<lightning:layout class=" slds-grid slds-p-around_x-small" multipleRows="true">
+                <lightning:layoutItem class="slds-p-around_xx-small slds-col" size="12" smallDeviceSize="12"  mediumDeviceSize="12" largeDeviceSize="2">
+                    <lightning:input name="radioBtn"
+                                     type="radio"
+                                     label="Transfer Down"
+                                     value="transferDown"
+                                     />
+                </lightning:layoutItem>
+                <lightning:layoutItem class="slds-p-around_xx-small slds-col" size="12" smallDeviceSize="12"   mediumDeviceSize="12" largeDeviceSize="2">
+                    <lightning:input name="radioBtn"
+                                     type="radio"
+                                     label="Pull-Up"
+                                     value="pullUp"
+                                     />
+                </lightning:layoutItem>
+                <lightning:layoutItem class="slds-p-around_xx-small slds-col" size="12"  smallDeviceSize="12" mediumDeviceSize="12" largeDeviceSize="2">
+                    <lightning:input name="radioBtn"
+                                     type="radio"
+                                     label="Lateral"
+                                     value="lateral"
+                                     />
+                </lightning:layoutItem>
+            </lightning:layout>-->
+            
+            
+            <lightning:layout class=" slds-grid slds-p-around_x-small" multipleRows="true">
+                <lightning:layoutItem class="slds-p-around_xx-small slds-col" size="12" smallDeviceSize="12"  mediumDeviceSize="12" largeDeviceSize="2">
+                    <lightning:input name="radioBtn"
+                                     type="radio"
+                                     label="Show Subordinates"
+                                     value="showSubordinates"
+                                     />
+                </lightning:layoutItem>
+                <lightning:layoutItem class="slds-p-around_xx-small slds-col" size="12" smallDeviceSize="12"   mediumDeviceSize="12" largeDeviceSize="2">
+                    <lightning:input name="radioBtn"
+                                     type="radio"
+                                     label="Pull-Up"
+                                     value="pullUp"
+                                     />
+                </lightning:layoutItem>
+            </lightning:layout>
+            
+            <lightning:layout class=" slds-grid slds-p-around_-medium slds-p-left_xx-small slds-p-top_small" multipleRows="true">                
+                <lightning:layoutItem class="slds-p-around_x-small slds-col" size="12" largeDeviceSize="6" mediumDeviceSize="6" smallDeviceSize="6">
+                    <span class="slds-text-color_weak">
+                        Showing only
+                    </span>
+                    <i>
+                        <b>
+                            Lower level Organization Units
+                        </b>
+                    </i>
+                    <span class="slds-text-color_weak">
+                        below
+                    </span>
+                </lightning:layoutItem>
+                
+                <lightning:layoutItem class="slds-p-around_x-small slds-col" size="12" largeDeviceSize="6" mediumDeviceSize="6" smallDeviceSize="6">
+                    <div style="float:right" class="slds-p-right_small">
+                        <span class="slds-p-right_small">
+                            <lightning:button class="slds-truncate"
+                                              aura:id="autoAllocate"
+                                              variant="neutral"
+                                              label="Auto Allocate"
+                                              onclick="{!c.autoAllocate}"/>
+                        </span>
+                        <span class="slds-p-top_xxx-small">
+                            <lightning:button class="slds-truncate"
+                                              aura:id="transferBudgetModal"
+                                              variant="neutral"
+                                              label="Search Organization Unit"
+                                              onclick="{!c.showBudgetAccessModal}"/>
+                        </span>
+                    </div>
+                </lightning:layoutItem>                
+            </lightning:layout>
+            
+            <!--Layout for button and text End-->
+            <!--Table Start-->
+            
+            <c:transferBudgetTableSample columnHeaders="{!v.columnHeaders}" 
+                                         allocatedAmount="{!v.allocatedAmount}"
+                                         allocatedCount="{!v.allocatedCount}"
+                                         budgetAllocationHistoryOrganizationUnitLowLevel="{!v.budgetAllocationHistoryOrganizationUnitLowLevel}"
+                                         amountIn="{!v.amountIn}"/>            
+            
+            
+            <!--Table Start-->
+            <div class="slds-p-around_xx-large">
+                <div class="slds-align_absolute-center">
+                    <p class="slds-text-color_weak">
+                        Couldn't find the Org Unit?
+                    </p>
+                    &nbsp;
+                    <a onclick="{!c.showBudgetAccessModal}">
+                        Search Organization Unit
+                    </a>
+                </div>
+            </div>
+            
+            <aura:set attribute="right">
+                <aura:if isTrue="{!!v.showSpinner}">
+                    <lightning:button aura:id="rightCloseButton"
+                                      variant="neutral"
+                                      label="Cancel"
+                                      onclick="{!c.closeTransferBudgetModal}" />
+                    <lightning:button aura:id="rightAllocateButton"
+                                      variant="brand"
+                                      label="Allocate"
+                                      onclick="{!c.showTransferBudgetModalToast}" />
+                    <aura:set attribute="else" >
+                        <lightning:spinner class="slds-is-relative slds-p-around_small slds-float_right"
+                                           alternativeText="Loading"
+                                           variant="brand"
+                                           size="small" />
+                    </aura:set>
+                </aura:if>
+            </aura:set>
+            <aura:set attribute="closeCrossIcon">
+                <lightning:buttonIcon alternativeText="Close"
+                                      class="{!'slds-button slds-modal__close slds-button_icon-inverse'}"
+                                      variant="bare" size="large" iconName="utility:close"
+                                      onclick="{!c.closeTransferBudgetModal}"/>
+            </aura:set>
+            
+        </c:modal>
+        <!--  SEARCH ORG UNIT MODAL START -->
+        <aura:if isTrue="{!v.showSearchAddOrgUnitModal}">
+            <c:SearchSelectOrganization aura:id="searchAddOrgUnit"
+                                        showSearchAddOrgUnitModal="{!v.showSearchAddOrgUnitModal}"
+                                        searchOrganizationUnitHelpTextType="{#v.searchOrganizationUnitHelpTextType}"
+                                        searchOrganizationUnitHelpTextVisibility="{#v.searchOrganizationUnitHelpTextVisibility}"
+                                        pageSize="5"             
+                                        pageNumber="1"
+                                        orgUnitLabels="{#v.orgUnitLabels}"
+                                        budgetId="{#v.budgetId}"    
+                                        context="{!v.context}"
+                                        infoMsg="{!v.infoMsg}"
+                                        />
+            
+        </aura:if>
+        <!--  SEARCH ORG UNIT MODAL END -->
+        
+    </aura:if>
+</aura:component>

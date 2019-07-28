@@ -1,0 +1,12 @@
+({    
+    handleClick : function(component, event, helper) {
+        helper.handleClick(component, event, helper);
+    },
+    handleInteractionCompEvent : function(component, event, helper){
+        helper.handleInteractionCompEvent(component, event, helper);
+    },
+    
+    getCount : function(component, event, helper){
+        var count= event.getSource().get("v.value");
+    },    
+})

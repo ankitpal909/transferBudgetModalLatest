@@ -1,0 +1,23 @@
+.THIS .ahm-Spinner-Background{
+    background-color: rgb(243, 242, 242);
+}
+
+.THIS .ahm-sizeOfModal{
+    /*margin-left: 60em;
+    transform: translateY(20em);
+    height: 25em;
+    width: 25em;*/
+    
+    margin-left: 59em;
+    transform: translateY(-9em);
+    height: 25em;
+    width: 25em;
+}
+
+.THIS .ahm-commentBox{   
+    padding: 0.1em;
+    bordercolor: black;
+    border-color: #757272;
+    border-style: inset;
+    border-radius: 0.5em
+}
